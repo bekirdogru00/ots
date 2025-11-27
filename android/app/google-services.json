@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "200038183409",
+    "project_id": "dershaneapp-a9674",
+    "storage_bucket": "dershaneapp-a9674.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:200038183409:android:1b3038233f3723eb1b9450",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_YJ1pxB_PLORlHFtioLtoCBBmUBWSdYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:200038183409:android:d784b7f575b63f001b9450",
+        "android_client_info": {
+          "package_name": "com.example.ogrencitakip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_YJ1pxB_PLORlHFtioLtoCBBmUBWSdYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
