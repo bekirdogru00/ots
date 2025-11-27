@@ -6,6 +6,7 @@ import 'feed_tab.dart';
 import 'ai_analysis_tab.dart';
 import 'messages_tab.dart';
 import 'profile_tab.dart';
+import '../classroom/classrooms_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,15 +17,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  
+
   late final List<Widget> _tabs;
-  
+
   @override
   void initState() {
     super.initState();
     _tabs = [
       const FeedTab(),
       const AIAnalysisTab(),
+      const ClassroomsTab(),
       const MessagesTab(),
       const ProfileTab(),
     ];
@@ -36,10 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final isTeacher = authProvider.isTeacher;
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _tabs,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _tabs),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -72,6 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.analytics_outlined),
               activeIcon: const Icon(Icons.analytics),
               label: isTeacher ? 'İstatistikler' : 'AI Analiz',
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.class_outlined),
+              activeIcon: const Icon(Icons.class_),
+              label: 'Sınıflarım',
             ),
             const BottomNavigationBarItem(
               icon: Icon(Icons.chat_bubble_outline),

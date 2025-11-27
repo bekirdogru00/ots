@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/database_service.dart';
 import '../../services/storage_service.dart';
 import '../../models/post_model.dart';
+import '../../models/classroom_model.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 
@@ -28,6 +29,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   List<File> _selectedImages = [];
   DateTime? _deadline;
+  ClassroomModel? _selectedClassroom;
   bool _isLoading = false;
 
   @override
@@ -40,7 +42,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<void> _pickImages() async {
     try {
       final List<XFile> images = await _imagePicker.pickMultiImage();
-      
+
       if (images.length > 5) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -99,6 +101,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<void> _createPost() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedClassroom == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lütfen bir sınıf seçin'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+      return;
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final user = authProvider.currentUser;
 
@@ -128,6 +140,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         imageUrls: imageUrls,
+        classroomId: _selectedClassroom?.id,
+        classroomName: _selectedClassroom?.name,
         createdAt: DateTime.now(),
         deadline: _deadline,
       );
@@ -162,9 +176,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Soru/Ödev Ekle'),
-      ),
+      appBar: AppBar(title: const Text('Soru/Ödev Ekle')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -203,6 +215,101 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
             const SizedBox(height: 20),
 
+            // Sınıf Seçimi
+            Text('Sınıf', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            StreamBuilder<List<ClassroomModel>>(
+              stream: _databaseService.getTeacherClassrooms(
+                Provider.of<AuthProvider>(
+                  context,
+                  listen: false,
+                ).currentUser!.id,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final classrooms = snapshot.data ?? [];
+
+                if (classrooms.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.errorColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.errorColor),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning, color: AppTheme.errorColor),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Önce bir sınıf oluşturmalısınız',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _selectedClassroom == null
+                          ? AppTheme.errorColor
+                          : const Color(0xFFE0E0E0),
+                    ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<ClassroomModel>(
+                      value: _selectedClassroom,
+                      isExpanded: true,
+                      hint: const Text('Sınıf seçin'),
+                      items: classrooms.map((classroom) {
+                        return DropdownMenuItem(
+                          value: classroom,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.class_, size: 20),
+                              const SizedBox(width: 12),
+                              Expanded(child: Text(classroom.name)),
+                              Text(
+                                '${classroom.studentCount} öğrenci',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedClassroom = value;
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+            if (_selectedClassroom == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8, left: 12),
+                child: Text(
+                  'Lütfen bir sınıf seçin',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppTheme.errorColor),
+                ),
+              ),
+
+            const SizedBox(height: 20),
+
             // Deadline
             Text(
               'Son Tarih (Opsiyonel)',
@@ -220,7 +327,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_today, color: AppTheme.primaryColor),
+                    const Icon(
+                      Icons.calendar_today,
+                      color: AppTheme.primaryColor,
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       _deadline != null
@@ -249,14 +359,14 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            
+
             if (_selectedImages.isEmpty)
               InkWell(
                 onTap: _pickImages,
                 child: Container(
                   height: 150,
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: AppTheme.primaryColor,

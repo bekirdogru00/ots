@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../config/routes.dart';
-import '../../config/constants.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/database_service.dart';
 import '../../models/post_model.dart';
@@ -56,7 +55,7 @@ class _FeedTabState extends State<FeedTab> {
         child: StreamBuilder<List<PostModel>>(
           stream: isTeacher
               ? _databaseService.getTeacherPosts(user.id)
-              : _databaseService.getPosts(user.teacherId ?? ''),
+              : _databaseService.getStudentPosts(user.id),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -67,7 +66,7 @@ class _FeedTabState extends State<FeedTab> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.error_outline,
                       size: 64,
                       color: AppTheme.errorColor,
@@ -106,8 +105,8 @@ class _FeedTabState extends State<FeedTab> {
                           ? 'Henüz soru/ödev paylaşmadınız'
                           : 'Henüz soru/ödev yok',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -115,8 +114,8 @@ class _FeedTabState extends State<FeedTab> {
                           ? 'Sağ üstteki + butonuna tıklayarak\nilk sorunuzu ekleyin'
                           : 'Hocanız henüz soru/ödev paylaşmamış',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.textLight,
-                          ),
+                        color: AppTheme.textLight,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -132,10 +131,9 @@ class _FeedTabState extends State<FeedTab> {
                 return PostCard(
                   post: post,
                   onTap: () {
-                    Navigator.of(context).pushNamed(
-                      AppRoutes.postDetail,
-                      arguments: post,
-                    );
+                    Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.postDetail, arguments: post);
                   },
                 );
               },

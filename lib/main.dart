@@ -14,20 +14,21 @@ import 'screens/post/post_detail_screen.dart';
 import 'screens/post/create_post_screen.dart';
 import 'screens/post/submission_screen.dart';
 import 'screens/chat/chat_screen.dart';
+import 'screens/chat/new_chat_screen.dart';
 import 'screens/subscription/subscription_screen.dart';
 import 'models/post_model.dart';
 import 'models/message_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Firebase'i başlat
   await Firebase.initializeApp();
-  
+
   // Bildirimleri başlat
   final notificationService = NotificationService();
   await notificationService.initialize();
-  
+
   runApp(const MyApp());
 }
 
@@ -52,58 +53,51 @@ class MyApp extends StatelessWidget {
         onGenerateRoute: (settings) {
           switch (settings.name) {
             case AppRoutes.splash:
-              return MaterialPageRoute(
-                builder: (_) => const SplashScreen(),
-              );
-            
+              return MaterialPageRoute(builder: (_) => const SplashScreen());
+
             case AppRoutes.login:
-              return MaterialPageRoute(
-                builder: (_) => const LoginScreen(),
-              );
-            
+              return MaterialPageRoute(builder: (_) => const LoginScreen());
+
             case AppRoutes.register:
-              return MaterialPageRoute(
-                builder: (_) => const RegisterScreen(),
-              );
-            
+              return MaterialPageRoute(builder: (_) => const RegisterScreen());
+
             case AppRoutes.home:
-              return MaterialPageRoute(
-                builder: (_) => const HomeScreen(),
-              );
-            
+              return MaterialPageRoute(builder: (_) => const HomeScreen());
+
             case AppRoutes.pomodoro:
-              return MaterialPageRoute(
-                builder: (_) => const PomodoroScreen(),
-              );
-            
+              return MaterialPageRoute(builder: (_) => const PomodoroScreen());
+
             case AppRoutes.postDetail:
               final post = settings.arguments as PostModel;
               return MaterialPageRoute(
                 builder: (_) => PostDetailScreen(post: post),
               );
-            
+
             case AppRoutes.createPost:
               return MaterialPageRoute(
                 builder: (_) => const CreatePostScreen(),
               );
-            
+
             case AppRoutes.submission:
               final post = settings.arguments as PostModel;
               return MaterialPageRoute(
                 builder: (_) => SubmissionScreen(post: post),
               );
-            
+
             case AppRoutes.chat:
-              final chat = settings.arguments as ChatModel;
               return MaterialPageRoute(
-                builder: (_) => ChatScreen(chat: chat),
+                builder: (_) =>
+                    ChatScreen(chat: settings.arguments as ChatModel),
               );
-            
+
+            case AppRoutes.newChat:
+              return MaterialPageRoute(builder: (_) => const NewChatScreen());
+
             case AppRoutes.subscription:
               return MaterialPageRoute(
                 builder: (_) => const SubscriptionScreen(),
               );
-            
+
             default:
               return AppRoutes.generateRoute(settings);
           }

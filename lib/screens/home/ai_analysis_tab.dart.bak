@@ -93,10 +93,7 @@ class _AIAnalysisTabState extends State<AIAnalysisTab>
 
             // Tüm sınıflardan öğrencileri topla
             return FutureBuilder<List<UserModel>>(
-              future: _getAllStudentsFromClassrooms(
-                classrooms,
-                _databaseService,
-              ),
+              future: _getAllStudentsFromClassrooms(classrooms),
               builder: (context, studentSnapshot) {
                 if (studentSnapshot.connectionState ==
                     ConnectionState.waiting) {
@@ -137,12 +134,7 @@ class _AIAnalysisTabState extends State<AIAnalysisTab>
                   itemCount: students.length,
                   itemBuilder: (context, index) {
                     final student = students[index];
-                    return _buildStudentCard(
-                      context,
-                      student,
-                      _databaseService,
-                      classrooms,
-                    );
+                    return _buildStudentCard(context, student, classrooms);
                   },
                 );
               },
@@ -835,98 +827,96 @@ class _NewAnalysisFormState extends State<_NewAnalysisForm> {
     );
   }
 
-// Tüm sınıflardan öğrencileri topla
-Future<List<UserModel>> _getAllStudentsFromClassrooms(
-  List<ClassroomModel> classrooms,
-  DatabaseService databaseService,
-) async {
-  final Set<String> studentIds = {};
-  final List<UserModel> students = [];
+  // Tüm sınıflardan öğrencileri topla
+  Future<List<UserModel>> _getAllStudentsFromClassrooms(
+    List<ClassroomModel> classrooms,
+  ) async {
+    final Set<String> studentIds = {};
+    final List<UserModel> students = [];
 
-  for (final classroom in classrooms) {
-    studentIds.addAll(classroom.studentIds);
-  }
-
-  for (final studentId in studentIds) {
-    final student = await databaseService.getUser(studentId);
-    if (student != null) {
-      students.add(student);
+    for (final classroom in classrooms) {
+      studentIds.addAll(classroom.studentIds);
     }
+
+    for (final studentId in studentIds) {
+      final student = await _databaseService.getUser(studentId);
+      if (student != null) {
+        students.add(student);
+      }
+    }
+
+    return students;
   }
 
-  return students;
-}
+  // Öğrenci kartı
+  Widget _buildStudentCard(
+    BuildContext context,
+    UserModel student,
+    List<ClassroomModel> classrooms,
+  ) {
+    final studentClassrooms = classrooms
+        .where((classroom) => classroom.studentIds.contains(student.id))
+        .toList();
 
-// Öğrenci kartı
-Widget _buildStudentCard(
-  BuildContext context,
-  UserModel student,
-  DatabaseService databaseService,
-  List<ClassroomModel> classrooms,
-) {
-  final studentClassrooms = classrooms
-      .where((classroom) => classroom.studentIds.contains(student.id))
-      .toList();
-
-  return Card(
-    margin: const EdgeInsets.only(bottom: 12),
-    child: InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => StudentAnalysisDetailScreen(
-              student: student,
-              classrooms: studentClassrooms,
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StudentAnalysisDetailScreen(
+                student: student,
+                classrooms: studentClassrooms,
+              ),
             ),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: AppTheme.primaryColor,
-              child: Text(
-                student.name[0].toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: AppTheme.primaryColor,
+                child: Text(
+                  student.name[0].toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    student.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    studentClassrooms.map((c) => c.name).join(', '),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      student.name,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      studentClassrooms.map((c) => c.name).join(', '),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Icon(Icons.chevron_right, color: AppTheme.textLight),
-          ],
+              const Icon(Icons.chevron_right, color: AppTheme.textLight),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 // Öğrenci Analiz Detay Ekranı

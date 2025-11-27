@@ -30,9 +30,7 @@ class _MessagesTabState extends State<MessagesTab> {
     timeago.setLocaleMessages('tr', timeago.TrMessages());
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mesajlar'),
-      ),
+      appBar: AppBar(title: const Text('Mesajlar')),
       body: StreamBuilder<List<ChatModel>>(
         stream: _databaseService.getUserChats(user.id, isTeacher),
         builder: (context, snapshot) {
@@ -41,9 +39,7 @@ class _MessagesTabState extends State<MessagesTab> {
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Hata: ${snapshot.error}'),
-            );
+            return Center(child: Text('Hata: ${snapshot.error}'));
           }
 
           final chats = snapshot.data ?? [];
@@ -62,17 +58,17 @@ class _MessagesTabState extends State<MessagesTab> {
                   Text(
                     'Henüz mesajınız yok',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     isTeacher
                         ? 'Öğrencileriniz size mesaj gönderdiğinde\nburada görünecek'
                         : 'Hocanızla mesajlaşmaya başlayın',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textLight,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: AppTheme.textLight),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -84,8 +80,12 @@ class _MessagesTabState extends State<MessagesTab> {
             itemCount: chats.length,
             itemBuilder: (context, index) {
               final chat = chats[index];
-              final otherUserName = isTeacher ? chat.studentName : chat.teacherName;
-              final otherUserImage = isTeacher ? chat.studentImageUrl : chat.teacherImageUrl;
+              final otherUserName = isTeacher
+                  ? chat.studentName
+                  : chat.teacherName;
+              final otherUserImage = isTeacher
+                  ? chat.studentImageUrl
+                  : chat.teacherImageUrl;
 
               return ListTile(
                 contentPadding: const EdgeInsets.symmetric(
@@ -134,10 +134,10 @@ class _MessagesTabState extends State<MessagesTab> {
                 title: Text(
                   otherUserName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: chat.unreadCount > 0
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
+                    fontWeight: chat.unreadCount > 0
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
                 ),
                 subtitle: Text(
                   chat.lastMessage ?? 'Henüz mesaj yok',
@@ -156,15 +156,20 @@ class _MessagesTabState extends State<MessagesTab> {
                       )
                     : null,
                 onTap: () {
-                  Navigator.of(context).pushNamed(
-                    AppRoutes.chat,
-                    arguments: chat,
-                  );
+                  Navigator.of(
+                    context,
+                  ).pushNamed(AppRoutes.chat, arguments: chat);
                 },
               );
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.newChat);
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

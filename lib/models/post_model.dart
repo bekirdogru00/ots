@@ -8,10 +8,12 @@ class PostModel {
   final String title;
   final String description;
   final List<String> imageUrls;
+  final String? classroomId; // Hangi sınıfa ait (nullable - eski postlar için)
+  final String? classroomName; // Sınıf adı
   final DateTime createdAt;
   final DateTime? deadline;
   final int submissionCount;
-  
+
   PostModel({
     required this.id,
     required this.teacherId,
@@ -20,11 +22,13 @@ class PostModel {
     required this.title,
     required this.description,
     this.imageUrls = const [],
+    this.classroomId,
+    this.classroomName,
     required this.createdAt,
     this.deadline,
     this.submissionCount = 0,
   });
-  
+
   // Firebase'den veri okuma
   factory PostModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -36,6 +40,8 @@ class PostModel {
       title: data['title'] ?? '',
       description: data['description'] ?? '',
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
+      classroomId: data['classroomId'],
+      classroomName: data['classroomName'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       deadline: data['deadline'] != null
           ? (data['deadline'] as Timestamp).toDate()
@@ -43,7 +49,7 @@ class PostModel {
       submissionCount: data['submissionCount'] ?? 0,
     );
   }
-  
+
   // Firebase'e veri yazma
   Map<String, dynamic> toFirestore() {
     return {
@@ -53,24 +59,26 @@ class PostModel {
       'title': title,
       'description': description,
       'imageUrls': imageUrls,
+      'classroomId': classroomId,
+      'classroomName': classroomName,
       'createdAt': Timestamp.fromDate(createdAt),
       'deadline': deadline != null ? Timestamp.fromDate(deadline!) : null,
       'submissionCount': submissionCount,
     };
   }
-  
+
   // Deadline geçti mi?
   bool get isDeadlinePassed {
     if (deadline == null) return false;
     return deadline!.isBefore(DateTime.now());
   }
-  
+
   // Deadline'a kalan süre
   Duration? get timeUntilDeadline {
     if (deadline == null) return null;
     return deadline!.difference(DateTime.now());
   }
-  
+
   // Kopya oluşturma
   PostModel copyWith({
     String? id,
@@ -80,6 +88,8 @@ class PostModel {
     String? title,
     String? description,
     List<String>? imageUrls,
+    String? classroomId,
+    String? classroomName,
     DateTime? createdAt,
     DateTime? deadline,
     int? submissionCount,
@@ -92,6 +102,8 @@ class PostModel {
       title: title ?? this.title,
       description: description ?? this.description,
       imageUrls: imageUrls ?? this.imageUrls,
+      classroomId: classroomId ?? this.classroomId,
+      classroomName: classroomName ?? this.classroomName,
       createdAt: createdAt ?? this.createdAt,
       deadline: deadline ?? this.deadline,
       submissionCount: submissionCount ?? this.submissionCount,
