@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../config/theme.dart';
 import '../../config/routes.dart';
 import '../../providers/auth_provider.dart';
@@ -19,6 +20,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
 
   @override
   void dispose() {
@@ -27,8 +35,42 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // Kaydedilmiş bilgileri yükle
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('saved_email');
+    final savedPassword = prefs.getString('saved_password');
+    final rememberMe = prefs.getBool('remember_me') ?? false;
+
+    if (rememberMe && savedEmail != null && savedPassword != null) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _passwordController.text = savedPassword;
+        _rememberMe = true;
+      });
+    }
+  }
+
+  // Bilgileri kaydet veya sil
+  Future<void> _saveCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    if (_rememberMe) {
+      await prefs.setString('saved_email', _emailController.text.trim());
+      await prefs.setString('saved_password', _passwordController.text);
+      await prefs.setBool('remember_me', true);
+    } else {
+      await prefs.remove('saved_email');
+      await prefs.remove('saved_password');
+      await prefs.setBool('remember_me', false);
+    }
+  }
+
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Beni hatırla seçeneğini kaydet
+    await _saveCredentials();
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
@@ -132,19 +174,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 const SizedBox(height: 10),
                 
-                // Şifremi unuttum
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // Şifre sıfırlama dialog'u
-                      _showResetPasswordDialog();
-                    },
-                    child: const Text('Şifremi Unuttum'),
-                  ),
+                // Beni Hatırla
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _rememberMe,
+                      onChanged: (value) {
+                        setState(() {
+                          _rememberMe = value ?? false;
+                        });
+                      },
+                      activeColor: AppTheme.primaryColor,
+                    ),
+                    const Text('Beni Hatırla'),
+                    const Spacer(),
+                    // Şifremi unuttum
+                    TextButton(
+                      onPressed: () {
+                        _showResetPasswordDialog();
+                      },
+                      child: const Text('Şifremi Unuttum'),
+                    ),
+                  ],
                 ),
                 
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 
                 // Giriş butonu
                 Consumer<AuthProvider>(
