@@ -834,6 +834,7 @@ class _NewAnalysisFormState extends State<_NewAnalysisForm> {
       ),
     );
   }
+}
 
 // Tüm sınıflardan öğrencileri topla
 Future<List<UserModel>> _getAllStudentsFromClassrooms(
@@ -926,7 +927,6 @@ Widget _buildStudentCard(
       ),
     ),
   );
-}
 }
 
 // Öğrenci Analiz Detay Ekranı
